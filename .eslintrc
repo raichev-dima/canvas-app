@@ -1,0 +1,11 @@
+{
+  "plugins": ["react-hooks"],
+  "extends": ["plugin:prettier/recommended", "plugin:jsx-a11y/recommended", "plugin:react-app/recommended"],
+  "rules": {
+    "react/jsx-boolean-value": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": "warn",
+    "arrow-body-style": ["error", "as-needed"]
+  }
+}
