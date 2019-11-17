@@ -36,10 +36,13 @@ function checkIfAllValuesInRange(a, b, ...values) {
   return values.every(value => value >= a && value <= b);
 }
 
-function checkIfPointsAreInCanvasArea(height, width, x1, y1, x2, y2) {
+function checkIfPointsAreInCanvasArea(height, width, ...coordinates) {
+  const abscissas = coordinates.filter((c, i) => !(i % 2));
+  const ordinates = coordinates.filter((c, i) => i % 2);
+
   return (
-    checkIfAllValuesInRange(1, width, x1, x2) &&
-    checkIfAllValuesInRange(1, height, y1, y2)
+    checkIfAllValuesInRange(1, width, ...abscissas) &&
+    checkIfAllValuesInRange(1, height, ...ordinates)
   );
 }
 
@@ -49,6 +52,14 @@ function checkIfAllValuesAreTruthy(...args) {
 
 function createVectorByCoordinates(a, b) {
   return [Math.min(a, b), Math.max(a, b)];
+}
+
+function getColorFromInput(colorInput) {
+  const colorSymbol = Symbol.for(colorInput);
+
+  return Object.values(Pixels).includes(colorSymbol)
+    ? Symbol(colorInput)
+    : colorSymbol;
 }
 
 class Canvas {
@@ -78,6 +89,18 @@ class Canvas {
     }
   }
 
+  _getPixel(col, row) {
+    return this._matrix[row - 1][col - 1];
+  }
+
+  _setPixel(col, row, value) {
+    this._matrix[row - 1][col - 1] = value;
+  }
+
+  checkIfPointsAreInCanvasArea(...points) {
+    return checkIfPointsAreInCanvasArea(this._height, this._width, ...points);
+  }
+
   print() {
     return matrixToString(this._matrix);
   }
@@ -92,9 +115,7 @@ class Canvas {
       );
     }
 
-    if (
-      !checkIfPointsAreInCanvasArea(this._height, this._width, x1, y1, x2, y2)
-    ) {
+    if (!this.checkIfPointsAreInCanvasArea(x1, y1, x2, y2)) {
       throw new Error(
         `${Exceptions.Line}: input values are out of canvas area`
       );
@@ -109,16 +130,16 @@ class Canvas {
     if (isVertical) {
       let [start, end] = createVectorByCoordinates(y1, y2);
 
-      for (let i = start - 1; i < end; ++i) {
-        this._matrix[i][x1 - 1] = Pixels.Point;
+      for (let i = start; i <= end; ++i) {
+        this._setPixel(x1, i, Pixels.Point);
       }
     }
 
     if (isHorizontal) {
       let [start, end] = createVectorByCoordinates(x1, x2);
 
-      for (let i = start - 1; i < end; ++i) {
-        this._matrix[y1 - 1][i] = Pixels.Point;
+      for (let i = start; i <= end; ++i) {
+        this._setPixel(i, y1, Pixels.Point);
       }
     }
   }
@@ -131,6 +152,45 @@ class Canvas {
       this.drawLine(x1, y2, x1, y1);
     } catch (e) {
       throw new Error(`${Exceptions.Rectangle}: ${e.message}`);
+    }
+  }
+
+  fill(x, y, colorInput) {
+    if (!checkIfAllValuesAreTruthy(x, y, colorInput)) {
+      throw new Error(
+        `${Exceptions.BucketFill}: likely you forgot to provide some values`
+      );
+    }
+
+    if (!this.checkIfPointsAreInCanvasArea(x, y)) {
+      throw new Error(
+        `${Exceptions.BucketFill}: input value is out of canvas area`
+      );
+    }
+
+    const color = getColorFromInput(colorInput);
+
+    const point = { x, y };
+    const queue = [];
+    const visitedPixels = {};
+    queue.push(point);
+
+    while (queue.length) {
+      let { x, y } = queue.pop();
+      const pixelKey = `${x}-${y}`;
+
+      if (this.checkIfPointsAreInCanvasArea(x, y) && !visitedPixels[pixelKey]) {
+        const pixel = this._getPixel(x, y);
+        visitedPixels[pixelKey] = true;
+
+        if (pixel !== Pixels.Point) {
+          this._setPixel(x, y, color);
+          queue.push({ x: x + 1, y });
+          queue.push({ x: x - 1, y });
+          queue.push({ x, y: y + 1 });
+          queue.push({ x, y: y - 1 });
+        }
+      }
     }
   }
 }

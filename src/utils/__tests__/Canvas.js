@@ -138,4 +138,76 @@ describe('Canvas', () => {
       expect(canvas.print()).toEqual(result);
     });
   });
+
+  describe('fill', () => {
+    /**
+     *
+     *  C 20 4
+     *
+     */
+
+    let canvas;
+    const width = 20;
+    const height = 4;
+    beforeEach(() => {
+      canvas = Canvas.create(width, height);
+    });
+
+    it('should throw an exception when passed the invalid parameters', () => {
+      expect(() => canvas.fill(12, 23, 5)).toThrow();
+      expect(() => canvas.fill(24, 2)).toThrow();
+      expect(() => canvas.fill()).toThrow();
+      expect(() => canvas.fill(2, 3, 2)).not.toThrow();
+    });
+
+    it('should fill the area with the provided color', () => {
+      const result1 =
+        '----------------------\n' +
+        '|oooooooooooooooxxxxx|\n' +
+        '|xxxxxxooooooooox   x|\n' +
+        '|     xoooooooooxxxxx|\n' +
+        '|     xoooooooooooooo|\n' +
+        '----------------------';
+
+      /**
+       *
+       *  L 1 2 6 2
+       *  L 6 3 6 4
+       *  R 16 1 20 3
+       *  B 10 3 o
+       *
+       */
+
+      canvas.drawLine(1, 2, 6, 2);
+      canvas.drawLine(6, 3, 6, 4);
+      canvas.drawRectangle(16, 1, 20, 3);
+      canvas.fill(10, 3, 'o');
+
+      expect(canvas.print()).toEqual(result1);
+
+      const result2 =
+        '----------------------\n' +
+        '|kkkkkkkkxooooooxxxxx|\n' +
+        '|xxxxxxkkxoooooox   x|\n' +
+        '|11111xkkxooooooxxxxx|\n' +
+        '|11111xkkxooooooooooo|\n' +
+        '----------------------';
+
+      /**
+       *
+       *  L 9 1 9 4
+       *  B 1 1 k
+       *  B 4 4 1
+       *  B 2 2 s -> shouldn't do something because the point is located on the line
+       *
+       */
+
+      canvas.drawLine(9, 1, 9, 4);
+      canvas.fill(2, 1, 'k');
+      canvas.fill(4, 4, 1);
+      canvas.fill(2, 2, 's');
+
+      expect(canvas.print()).toEqual(result2);
+    });
+  });
 });
