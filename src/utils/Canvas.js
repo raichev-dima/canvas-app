@@ -102,6 +102,17 @@ class Canvas {
       }
     }
   }
+
+  drawRectangle(x1, y1, x2, y2) {
+    try {
+      this.drawLine(x1, y1, x2, y1);
+      this.drawLine(x2, y1, x2, y2);
+      this.drawLine(x2, y2, x1, y2);
+      this.drawLine(x1, y2, x1, y1);
+    } catch (e) {
+      throw new Error(`${Exceptions.Rectangle}: ${e.message}`);
+    }
+  }
 }
 
 export default Canvas;

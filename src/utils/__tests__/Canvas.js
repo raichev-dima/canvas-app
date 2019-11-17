@@ -99,4 +99,38 @@ describe('Canvas', () => {
       expect(canvas.matrix).toEqual(result);
     });
   });
+
+  describe('drawRectangle', () => {
+    let canvas;
+    const width = 5;
+    const height = 6;
+    beforeEach(() => {
+      canvas = Canvas.create(width, height);
+    });
+
+    it('should throw an exception when passed the invalid parameters', () => {
+      expect(() => canvas.drawRectangle(12, 23, 5, 9)).toThrow();
+      expect(() => canvas.drawRectangle(12, 23)).toThrow();
+      expect(() => canvas.drawRectangle(2, 3, 2, 6)).not.toThrow();
+      expect(() => canvas.drawRectangle(1, 3, 2, 8)).toThrow();
+      expect(() => canvas.drawRectangle(5, 6, 2, 6)).not.toThrow();
+    });
+
+    it('should draw different rectangles', () => {
+      const result = [
+        [1, 1, 1, 1, 0],
+        [1, 0, 0, 1, 0],
+        [1, 0, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 1],
+        [1, 0, 1, 1, 1],
+      ];
+
+      canvas.drawRectangle(1, 1, 4, 4);
+      canvas.drawRectangle(3, 3, 5, 6);
+      canvas.drawRectangle(1, 6, 1, 6);
+
+      expect(canvas.matrix).toEqual(result);
+    });
+  });
 });
