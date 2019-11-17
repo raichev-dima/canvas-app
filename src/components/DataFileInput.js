@@ -1,19 +1,14 @@
 import React from 'react';
 
+import processInputFile from '../utils/processInputFile';
 import './DataFileInput.css';
 
 function DataFileInput() {
-  const handleFileOpen = e => {
+  const handleFileOpen = async e => {
     const [file] = e.target.files;
 
-    const reader = new FileReader();
-
-    reader.onload = function() {
-      // TODO
-      // const text = reader.result;
-    };
-
-    reader.readAsText(file);
+    const result = await processInputFile(file);
+    // TODO
   };
 
   return (
