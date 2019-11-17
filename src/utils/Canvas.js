@@ -5,6 +5,27 @@ const Exceptions = {
   BucketFill: "Can't do a filling for this area",
 };
 
+const Pixels = {
+  Point: Symbol('x'),
+  Empty: Symbol(' '),
+};
+
+function symbolToString(symbol) {
+  // eslint-disable-next-line no-unused-vars
+  const [_, match] = symbol.toString().match(/^Symbol\(([\w ]+)\)$/);
+  return match;
+}
+
+export function matrixToString(matrix) {
+  const [topRow] = matrix;
+  const borderLine = `-${topRow.map(() => '-').join('')}-`;
+  const body = matrix.reduce(
+    (str, row) => `${str}|${row.map(symbolToString).join('')}|\n`,
+    ''
+  );
+  return `${borderLine}\n${body}${borderLine}`;
+}
+
 function checkIfAllValuesAreIntegers(...args) {
   return (
     args.length && args.every(arg => Number.isSafeInteger(arg) && arg >= 0)
@@ -32,9 +53,9 @@ function createVectorByCoordinates(a, b) {
 
 class Canvas {
   constructor(width, height) {
-    this.width = width;
-    this.height = height;
-    this.matrix = [];
+    this._width = width;
+    this._height = height;
+    this._matrix = [];
 
     this._init();
   }
@@ -48,18 +69,17 @@ class Canvas {
   };
 
   _init() {
-    for (let i = 0; i < this.height; ++i) {
-      this.matrix[i] = [];
+    for (let i = 0; i < this._height; ++i) {
+      this._matrix[i] = [];
 
-      for (let j = 0; j < this.width; ++j) {
-        this.matrix[i][j] = 0;
+      for (let j = 0; j < this._width; ++j) {
+        this._matrix[i][j] = Pixels.Empty;
       }
     }
   }
 
-  // for better debugging
-  _print() {
-    return this.matrix.reduce((str, row) => `${str}\n${row.join(', ')}`, '');
+  print() {
+    return matrixToString(this._matrix);
   }
 
   drawLine(x1, y1, x2, y2) {
@@ -73,7 +93,7 @@ class Canvas {
     }
 
     if (
-      !checkIfPointsAreInCanvasArea(this.height, this.width, x1, y1, x2, y2)
+      !checkIfPointsAreInCanvasArea(this._height, this._width, x1, y1, x2, y2)
     ) {
       throw new Error(
         `${Exceptions.Line}: input values are out of canvas area`
@@ -90,7 +110,7 @@ class Canvas {
       let [start, end] = createVectorByCoordinates(y1, y2);
 
       for (let i = start - 1; i < end; ++i) {
-        this.matrix[i][x1 - 1] = 1;
+        this._matrix[i][x1 - 1] = Pixels.Point;
       }
     }
 
@@ -98,7 +118,7 @@ class Canvas {
       let [start, end] = createVectorByCoordinates(x1, x2);
 
       for (let i = start - 1; i < end; ++i) {
-        this.matrix[y1 - 1][i] = 1;
+        this._matrix[y1 - 1][i] = Pixels.Point;
       }
     }
   }
