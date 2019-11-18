@@ -7,7 +7,14 @@ const ActionTypes = {
   BUCKET_FILL: 'B',
 };
 
-const stringsToIntegers = strings => strings.map(i => parseInt(i));
+const stringsToIntegers = strings =>
+  strings.map(i => {
+    try {
+      return JSON.parse(i);
+    } catch (e) {
+      throw new Error("Couldn't perform the action: inputs are not numbers");
+    }
+  });
 
 let canvas;
 

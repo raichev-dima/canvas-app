@@ -97,7 +97,7 @@ class Canvas {
     this._matrix[row - 1][col - 1] = value;
   }
 
-  checkIfPointsAreInCanvasArea(...points) {
+  _checkIfPointsAreInCanvasArea(...points) {
     return checkIfPointsAreInCanvasArea(this._height, this._width, ...points);
   }
 
@@ -115,7 +115,7 @@ class Canvas {
       );
     }
 
-    if (!this.checkIfPointsAreInCanvasArea(x1, y1, x2, y2)) {
+    if (!this._checkIfPointsAreInCanvasArea(x1, y1, x2, y2)) {
       throw new Error(
         `${Exceptions.Line}: input values are out of canvas area`
       );
@@ -162,7 +162,7 @@ class Canvas {
       );
     }
 
-    if (!this.checkIfPointsAreInCanvasArea(x, y)) {
+    if (!this._checkIfPointsAreInCanvasArea(x, y)) {
       throw new Error(
         `${Exceptions.BucketFill}: input value is out of canvas area`
       );
@@ -179,7 +179,10 @@ class Canvas {
       let { x, y } = queue.pop();
       const pixelKey = `${x}-${y}`;
 
-      if (this.checkIfPointsAreInCanvasArea(x, y) && !visitedPixels[pixelKey]) {
+      if (
+        this._checkIfPointsAreInCanvasArea(x, y) &&
+        !visitedPixels[pixelKey]
+      ) {
         const pixel = this._getPixel(x, y);
         visitedPixels[pixelKey] = true;
 
