@@ -1,7 +1,7 @@
 import React from 'react';
 
 import processInputFile from '../utils/processInputFile';
-import './DataFileInput.css';
+import styles from './DataFileInput.module.scss';
 
 function DataFileInput() {
   const handleFileOpen = async e => {
@@ -12,12 +12,12 @@ function DataFileInput() {
   };
 
   return (
-    <div className="input-data-field">
-      <label className="input-data-field__label" htmlFor="input-file">
+    <div className={styles.inputDataField}>
+      <label className={styles.inputDataField__label} htmlFor="input-file">
         Choose data input file
       </label>
       <input
-        className="input-data-field__input"
+        className={styles.inputDataField__input}
         type="file"
         id="input-file"
         accept=".txt"

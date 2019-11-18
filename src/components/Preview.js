@@ -1,10 +1,10 @@
 import React from 'react';
 
-import './Preview.css';
+import styles from './Preview.module.scss';
 
 function Preview(props) {
   return (
-    <div className="preview">
+    <div className={styles.preview}>
       <textarea />
     </div>
   );

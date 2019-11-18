@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './DownloadButton.css';
+import styles from './DownloadButton.module.scss';
 
 function DownloadButton(props) {
   return (
