@@ -1,3 +1,37 @@
-.downloadButton {
-  margin-bottom: 1rem;
+@value inputDataFieldWidth from "./DataFileInput.module.scss";
+
+.download__container {
+  width: 100%;
+  display: inline-block;
+  text-align: center;
+}
+
+.download__button {
+  margin-top: 2rem;
+  display: inline-block;
+  width: calc(inputDataFieldWidth - 10rem);
+  height: 3.5rem;
+  line-height: 3.5rem;
+  border: none;
+  color: #fff;
+  background: #16a085;
+  border-radius: 4px;
+  border-bottom: 4px solid #117a60;
+  transition: all 0.2s ease;
+  outline: none;
+
+  &,
+  &:visited {
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  &:hover {
+    background: #149174;
+    color: #0c5645;
+  }
+
+  &:active {
+    border: 0;
+  }
 }

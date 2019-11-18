@@ -4,8 +4,10 @@ import styles from './DownloadButton.module.scss';
 
 function DownloadButton(props) {
   return (
-    <div>
-      <a href="/">Download this canvas</a>
+    <div className={styles.download__container}>
+      <a href="/" className={styles.download__button}>
+        Download this canvas
+      </a>
     </div>
   );
 }

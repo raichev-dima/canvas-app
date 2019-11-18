@@ -1,0 +1,6 @@
+@value inputDataFieldHeight from "./components/DataFileInput.module.scss";
+
+.inputForm {
+  position: relative;
+  padding-top: inputDataFieldHeight;
+}

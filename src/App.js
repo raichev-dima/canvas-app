@@ -2,18 +2,22 @@ import React from 'react';
 
 import { DataFileInput, Preview, DownloadButton } from './components';
 
-import './styles.css';
+import './styles.scss';
+
+import styles from './App.module.scss';
+
+const FORM_ID = 'file-input-form';
 
 function App() {
   return (
-    <div className="App">
+    <main>
       <h1>Canvas</h1>
-      <form>
+      <form id={FORM_ID} className={styles.inputForm}>
         <DataFileInput />
-        <Preview />
         <DownloadButton />
+        <Preview />
       </form>
-    </div>
+    </main>
   );
 }
 

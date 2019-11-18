@@ -1,0 +1,36 @@
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  box-sizing: inherit;
+}
+
+html {
+  height: 100%;
+  font-size: 62.5%;
+}
+
+h1 {
+  font-size: 3.2rem;
+  margin: 1.5rem 0 3rem 0;
+  text-align: center;
+}
+
+main {
+  padding: 1rem;
+}
+
+body {
+  height: 100%;
+  min-width: 32rem;
+  box-sizing: border-box;
+  font-size: 1.4rem;
+  font-family: sans-serif;
+}
+
+#root {
+  position: relative;
+  min-height: 100vh;
+}
