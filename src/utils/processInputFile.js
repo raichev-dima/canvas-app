@@ -47,7 +47,7 @@ function performActionOnCanvas(type, ...args) {
 
 export function processInputString(str) {
   try {
-    const actions = str.split('\n');
+    const actions = str.split('\n').filter(action => action.length);
     let result = '';
 
     while (actions.length) {
