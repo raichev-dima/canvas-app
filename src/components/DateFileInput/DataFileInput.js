@@ -18,7 +18,8 @@ function DataFileInput() {
   return (
     <div className={styles.inputDataField}>
       <label className={styles.inputDataField__label} htmlFor={FILE_INPUT_ID}>
-        Drag your input file here or click in this area.
+        <span>Drag your input file here or click in this area</span>
+        <div className={styles.inputDataField__overlay} />
       </label>
       <SrOnly>
         <input

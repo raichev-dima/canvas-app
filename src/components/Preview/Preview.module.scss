@@ -7,11 +7,14 @@
 }
 
 .preview__area {
-  margin-top: 2rem;
+  margin-top: 3rem;
   width: inputDataFieldWidth;
   height: 50rem;
-  border: 3px solid #cccccc;
+  border: none;
+  box-shadow: 0 2rem 6rem 1rem #747681;
   padding: 5px;
   font-family: Tahoma, sans-serif;
   resize: none;
+  background-color: #d5d5d5e0;
+  cursor: initial;
 }

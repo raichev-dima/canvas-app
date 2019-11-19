@@ -6,12 +6,14 @@
   text-align: center;
 }
 
+@value downloadButtonHeight: 4.5rem;
+
 .download__button {
   margin-top: 2rem;
   display: inline-block;
   width: calc(inputDataFieldWidth - 10rem);
-  height: 3.5rem;
-  line-height: 3.5rem;
+  height: downloadButtonHeight;
+  line-height: downloadButtonHeight;
   border: none;
   color: #fff;
   background: #16a085;

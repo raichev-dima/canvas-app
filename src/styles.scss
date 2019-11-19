@@ -10,17 +10,18 @@
 html {
   height: 100%;
   font-size: 62.5%;
+  color: #454141;
 }
 
 h1 {
-  font-size: 3.2rem;
+  font-size: 6.2rem;
   margin: 1.5rem 0 3rem 0;
   text-align: center;
 }
 
 main {
   margin: 0 auto;
-  max-width: 100rem;
+  max-width: 120rem;
   height: 100%;
   padding: 1rem;
   background-image: url('../src/images/background.jpg');
@@ -34,7 +35,8 @@ body {
   min-width: 32rem;
   box-sizing: border-box;
   font-size: 1.4rem;
-  font-family: sans-serif;
+  font-family: "Fira Code", serif;
+  font-style: oblique;
   background: rgb(192, 209, 238);
 }
 

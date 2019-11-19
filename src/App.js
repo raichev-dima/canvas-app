@@ -11,7 +11,7 @@ const FORM_ID = 'file-input-form';
 function App() {
   return (
     <main>
-      <h1>Canvas</h1>
+      <h1>Canvas App</h1>
       <form id={FORM_ID} className={styles.inputForm}>
         <DataFileInput />
         <DownloadButton />
