@@ -1,7 +1,7 @@
 import React from 'react';
 
-import processInputFile from '../utils/processInputFile';
-import SrOnly from './SrOnly';
+import processInputFile from '../../utils/processInputFile';
+import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
 
 const FILE_INPUT_ID = 'file-input';
