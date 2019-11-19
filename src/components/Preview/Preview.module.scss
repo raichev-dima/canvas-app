@@ -1,13 +1,15 @@
 @value inputDataFieldWidth from '../DateFileInput/DataFileInput.module.scss';
 
 .preview__container {
+  position: relative;
+  margin-top: 3rem;
   width: 100%;
-  display: inline-block;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .preview__area {
-  margin-top: 3rem;
   width: inputDataFieldWidth;
   height: 50rem;
   border: none;
