@@ -63,18 +63,21 @@ export function processInputString(str) {
 
 export default function processInputFile(file) {
   return new Promise((resolve, reject) => {
-    try {
-      const reader = new FileReader();
-      reader.onload = function() {
-        const text = reader.result;
+    if (file.type !== 'text/plain') {
+      throw new Error(`Couldn't read the non-text format file`);
+    }
+    const reader = new FileReader();
 
+    reader.onload = function() {
+      const text = reader.result;
+      try {
         const result = processInputString(text);
         resolve(result);
-      };
+      } catch (e) {
+        reject(new Error(`Couldn't read the file: ${e.message}`));
+      }
+    };
 
-      reader.readAsText(file);
-    } catch (e) {
-      reject(`Couldn't read the file: ${e.message}`);
-    }
+    reader.readAsText(file);
   });
 }
