@@ -84,7 +84,7 @@ function reducer(state, action) {
 }
 
 function DataFileInput() {
-  const ref = useRef();
+  const ref = useRef(document.createElement('div'));
 
   const [state, dispatch] = useReducer(reducer, {});
 
