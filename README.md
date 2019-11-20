@@ -25,5 +25,5 @@ B x y c
 ## Пример:
 Примеры входного и выходного файлов: [input.txt](examples/input.txt) и [output.txt](examples/output.txt).
 
-## Deploy
+## Demo
 See [here](https://cocky-goldwasser-fca61f.netlify.com/)
