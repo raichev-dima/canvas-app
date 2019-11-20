@@ -5,7 +5,7 @@ import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
 import { useAppDispatch, AppActions } from '../../AppProvider';
 
-const FILE_INPUT_ID = 'file-input';
+export const FILE_INPUT_ID = 'file-input';
 
 const dragEvents = [
   'drag',

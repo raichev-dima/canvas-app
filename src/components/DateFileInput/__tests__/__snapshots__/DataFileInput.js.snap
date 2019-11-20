@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<DataFileInput /> spec renders the component 1`] = `
+<div>
+  <div
+    class="inputDataField"
+  >
+    <label
+      class="inputDataField__label"
+      for="file-input"
+    >
+      <span>
+        Drag your input file here or click in this area
+      </span>
+      <div
+        class="inputDataField__overlay"
+      />
+    </label>
+    <div
+      class="srOnly"
+    >
+      <input
+        accept=".txt"
+        id="file-input"
+        type="file"
+      />
+    </div>
+  </div>
+</div>
+`;
