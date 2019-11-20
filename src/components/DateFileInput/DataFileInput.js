@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 
-import processInputFile from '../../utils/processInputFile';
+import FileManager from '../../utils/FileManager';
 import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
-import { useAppDispatch, useAppState, AppActions } from '../../AppProvider';
+import { useAppDispatch, AppActions } from '../../AppProvider';
 
 const FILE_INPUT_ID = 'file-input';
 
@@ -40,16 +40,9 @@ function useReadFile(fileHandler) {
   };
 }
 
-async function fileHandler(file) {
-  const result = await processInputFile(file);
-  const blob = new File([result], 'output.txt');
-
-  return [result, URL.createObjectURL(blob)];
-}
-
-const useDragEventHandler = () => {
+const useDragEventHandler = prepareOutput => {
   const dispatch = useAppDispatch();
-  const readFile = useReadFile(fileHandler);
+  const readFile = useReadFile(prepareOutput);
 
   return async e => {
     e.preventDefault();
@@ -75,10 +68,9 @@ const useDragEventHandler = () => {
 
 function DataFileInput() {
   const ref = useRef(document.createElement('div'));
-  const readFile = useReadFile(fileHandler);
+  const readFile = useReadFile(FileManager.prepareOutput);
 
-  const state = useAppState();
-  const dragEventHandler = useDragEventHandler();
+  const dragEventHandler = useDragEventHandler(FileManager.prepareOutput);
 
   useEffect(() => {
     const node = ref.current;
@@ -98,25 +90,20 @@ function DataFileInput() {
   };
 
   return (
-    <>
-      <a href={state.url} download="output">
-        Link to the file output
-      </a>
-      <div ref={ref} className={styles.inputDataField}>
-        <label className={styles.inputDataField__label} htmlFor={FILE_INPUT_ID}>
-          <span>Drag your input file here or click in this area</span>
-          <div className={styles.inputDataField__overlay} />
-        </label>
-        <SrOnly>
-          <input
-            type="file"
-            id={FILE_INPUT_ID}
-            accept=".txt"
-            onChange={handleInputChange}
-          />
-        </SrOnly>
-      </div>
-    </>
+    <div ref={ref} className={styles.inputDataField}>
+      <label className={styles.inputDataField__label} htmlFor={FILE_INPUT_ID}>
+        <span>Drag your input file here or click in this area</span>
+        <div className={styles.inputDataField__overlay} />
+      </label>
+      <SrOnly>
+        <input
+          type="file"
+          id={FILE_INPUT_ID}
+          accept=".txt"
+          onChange={handleInputChange}
+        />
+      </SrOnly>
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { processInputString } from '../processInputFile';
+import FileManager from '../FileManager';
 
 function readFile(filePath) {
   return new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@ describe('parseInputString', () => {
     const input = await readFile('../../../examples/input.txt');
     const output = await readFile('../../../examples/output.txt');
 
-    const result = processInputString(input);
+    const result = FileManager.processInputString(input);
 
     expect(result).toBe(output);
   });

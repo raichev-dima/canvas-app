@@ -61,7 +61,14 @@ export function processInputString(str) {
   }
 }
 
-export default function processInputFile(file) {
+async function prepareOutput(file) {
+  const result = await processInputFile(file);
+  const blob = new File([result], 'output.txt');
+
+  return [result, URL.createObjectURL(blob)];
+}
+
+function processInputFile(file) {
   return new Promise((resolve, reject) => {
     if (file.type !== 'text/plain') {
       throw new Error(`Couldn't read the non-text format file`);
@@ -81,3 +88,9 @@ export default function processInputFile(file) {
     reader.readAsText(file);
   });
 }
+
+export default {
+  prepareOutput,
+  processInputFile,
+  processInputString,
+};
