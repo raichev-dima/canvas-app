@@ -24,10 +24,10 @@ main {
   max-width: 120rem;
   height: 100%;
   padding: 1rem;
-  background-image: url('../src/images/background.jpg');
-  box-shadow: 0 0 4rem 6rem #797979;
-  background-repeat: no-repeat;
+  background: url('../src/images/background.jpg') no-repeat center center
+    fixed;
   background-size: cover;
+  box-shadow: 0 0 4rem 6rem #797979;
 }
 
 body {
@@ -35,7 +35,7 @@ body {
   min-width: 32rem;
   box-sizing: border-box;
   font-size: 1.4rem;
-  font-family: "Fira Code", serif;
+  font-family: 'Fira Code', serif;
   font-style: oblique;
   background: rgb(192, 209, 238);
 }
