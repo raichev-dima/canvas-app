@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useReducer } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import processInputFile from '../../utils/processInputFile';
 import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
+import { useAppDispatch, useAppState, AppActions } from '../../AppProvider';
 
 const FILE_INPUT_ID = 'file-input';
 
@@ -20,88 +21,80 @@ const dragEvents = [
 const isEnterDragEvent = eventType => /dragover|dragenter/.test(eventType);
 const isLeaveDragEvent = eventType => /dragleave|dragexit/.test(eventType);
 
-const Actions = {
-  DRAG_ENTER: 'DRAG_ENTER',
-  DRAG_LEAVE: 'DRAG_LEAVE',
-  PROCESS_FILE_SUCCESS: 'PROCESS_FILE_SUCCESS',
-  PROCESS_FILE_ERROR: 'PROCESS_FILE_ERROR',
-  LOADING: 'LOADING',
-};
+function useReadFile(fileHandler) {
+  const dispatch = useAppDispatch();
 
-async function readFile(file, dispatch) {
-  dispatch({ type: Actions.LOADING, payload: true });
-  try {
-    const result = await processInputFile(file);
-    const blob = new File([result], 'output.txt');
-
-    const dataUrl = URL.createObjectURL(blob);
-    dispatch({
-      type: Actions.PROCESS_FILE_SUCCESS,
-      payload: { result, url: dataUrl },
-    });
-  } catch (e) {
-    dispatch({ type: Actions.PROCESS_FILE_ERROR, payload: e.message });
-  } finally {
-    dispatch({ type: Actions.LOADING, payload: false });
-  }
+  return async function(file) {
+    dispatch({ type: AppActions.LOADING, payload: true });
+    try {
+      const [result, dataUrl] = await fileHandler(file);
+      dispatch({
+        type: AppActions.PROCESS_FILE_SUCCESS,
+        payload: { result, url: dataUrl },
+      });
+    } catch (e) {
+      dispatch({ type: AppActions.PROCESS_FILE_ERROR, payload: e.message });
+    } finally {
+      dispatch({ type: AppActions.LOADING, payload: false });
+    }
+  };
 }
 
-const createDragEventHandler = dispatch => async e => {
-  e.preventDefault();
-  e.stopPropagation();
+async function fileHandler(file) {
+  const result = await processInputFile(file);
+  const blob = new File([result], 'output.txt');
 
-  const { type } = e;
-
-  switch (true) {
-    case isEnterDragEvent(type):
-      dispatch({ type: Actions.DRAG_ENTER });
-      break;
-    case isLeaveDragEvent(type):
-      dispatch({ type: Actions.DRAG_LEAVE });
-      break;
-    case type === 'drop':
-      const [file] = e.dataTransfer.files;
-      await readFile(file, dispatch);
-      break;
-    default:
-  }
-};
-
-function reducer(state, action) {
-  switch (action.type) {
-    case Actions.DRAG_LEAVE:
-      return { ...state, activeClass: '' };
-    case Actions.DRAG_ENTER:
-      return { ...state, activeClass: '' };
-    case Actions.PROCESS_FILE_SUCCESS:
-      const { result, url } = action.payload;
-      return { ...state, result, url };
-    case Actions.PROCESS_FILE_ERROR:
-      return { ...state, error: action.payload };
-    default:
-      return state;
-  }
+  return [result, URL.createObjectURL(blob)];
 }
+
+const useDragEventHandler = () => {
+  const dispatch = useAppDispatch();
+  const readFile = useReadFile(fileHandler);
+
+  return async e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const { type } = e;
+
+    switch (true) {
+      case isEnterDragEvent(type):
+        dispatch({ type: AppActions.DRAG_ENTER });
+        break;
+      case isLeaveDragEvent(type):
+        dispatch({ type: AppActions.DRAG_LEAVE });
+        break;
+      case type === 'drop':
+        const [file] = e.dataTransfer.files;
+        await readFile(file);
+        break;
+      default:
+    }
+  };
+};
 
 function DataFileInput() {
   const ref = useRef(document.createElement('div'));
+  const readFile = useReadFile(fileHandler);
 
-  const [state, dispatch] = useReducer(reducer, {});
+  const state = useAppState();
+  const dragEventHandler = useDragEventHandler();
 
   useEffect(() => {
     const node = ref.current;
-    const handler = createDragEventHandler(dispatch);
-    dragEvents.forEach(eventType => node.addEventListener(eventType, handler));
+    dragEvents.forEach(eventType =>
+      node.addEventListener(eventType, dragEventHandler)
+    );
     return () =>
       dragEvents.forEach(eventType =>
-        node.removeEventListener(eventType, handler)
+        node.removeEventListener(eventType, dragEventHandler)
       );
-  }, []);
+  }, [dragEventHandler]);
 
   const handleInputChange = async e => {
     const [file] = e.target.files;
 
-    await readFile(file, dispatch);
+    await readFile(file);
   };
 
   return (
