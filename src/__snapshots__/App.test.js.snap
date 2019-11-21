@@ -13,6 +13,12 @@ exports[`<App /> spec renders the component 1`] = `
       <div
         class="inputDataField"
       >
+        <input
+          accept=".txt"
+          class="inputDataField__input  srOnly"
+          id="file-input"
+          type="file"
+        />
         <label
           class="inputDataField__label"
           for="file-input"
@@ -24,15 +30,6 @@ exports[`<App /> spec renders the component 1`] = `
             class="inputDataField__overlay"
           />
         </label>
-        <div
-          class="srOnly"
-        >
-          <input
-            accept=".txt"
-            id="file-input"
-            type="file"
-          />
-        </div>
       </div>
       <div
         class="download__container"

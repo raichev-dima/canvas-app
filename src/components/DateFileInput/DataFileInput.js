@@ -91,18 +91,18 @@ function DataFileInput() {
 
   return (
     <div ref={ref} className={styles.inputDataField}>
+      <SrOnly
+        is="input"
+        type="file"
+        id={FILE_INPUT_ID}
+        accept=".txt"
+        onChange={handleInputChange}
+        className={styles.inputDataField__input}
+      />
       <label className={styles.inputDataField__label} htmlFor={FILE_INPUT_ID}>
         <span>Drag your input file here or click in this area</span>
         <div className={styles.inputDataField__overlay} />
       </label>
-      <SrOnly>
-        <input
-          type="file"
-          id={FILE_INPUT_ID}
-          accept=".txt"
-          onChange={handleInputChange}
-        />
-      </SrOnly>
     </div>
   );
 }
