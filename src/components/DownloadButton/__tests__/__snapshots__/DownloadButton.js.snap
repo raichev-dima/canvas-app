@@ -5,12 +5,13 @@ exports[`<DataFileInput /> spec renders the component 1`] = `
   <div
     class="download__container"
   >
-    <a
+    <button
       class="download__button"
-      href="/"
+      disabled=""
+      type="button"
     >
       Download this canvas
-    </a>
+    </button>
   </div>
 </div>
 `;

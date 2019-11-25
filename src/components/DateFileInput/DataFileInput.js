@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useReducer } from 'react';
 
 import FileManager from '../../utils/FileManager';
 import SrOnly from '../SrOnly/SrOnly';
@@ -15,7 +15,6 @@ const dragEvents = [
   'dragenter',
   'dragleave',
   'dragexit',
-  'drop',
 ];
 
 const isEnterDragEvent = eventType => /dragover|dragenter/.test(eventType);
@@ -40,11 +39,25 @@ function useReadFile(fileHandler) {
   };
 }
 
-const useDragEventHandler = prepareOutput => {
-  const dispatch = useAppDispatch();
-  const readFile = useReadFile(prepareOutput);
+export const DataFileInputActions = {
+  DRAG_ENTER: 'DRAG_ENTER',
+  DRAG_LEAVE: 'DRAG_LEAVE',
+};
 
-  return async e => {
+function dataFileInputReducer(state, action) {
+  switch (action.type) {
+    case DataFileInputActions.DRAG_LEAVE:
+      return { ...state, active: false };
+    case DataFileInputActions.DRAG_ENTER:
+      return { ...state, active: true };
+    default:
+      return state;
+  }
+}
+
+const useDragEventHandler = () => {
+  const [state, dispatch] = useReducer(dataFileInputReducer, { active: false });
+  const handler = async e => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -52,17 +65,27 @@ const useDragEventHandler = prepareOutput => {
 
     switch (true) {
       case isEnterDragEvent(type):
-        dispatch({ type: AppActions.DRAG_ENTER });
+        dispatch({ type: DataFileInputActions.DRAG_ENTER });
         break;
       case isLeaveDragEvent(type):
-        dispatch({ type: AppActions.DRAG_LEAVE });
-        break;
-      case type === 'drop':
-        const [file] = e.dataTransfer.files;
-        await readFile(file);
+        dispatch({ type: DataFileInputActions.DRAG_LEAVE });
         break;
       default:
     }
+  };
+
+  return [state, handler];
+};
+
+const useDropEventHandler = prepareOutput => {
+  const readFile = useReadFile(prepareOutput);
+
+  return async e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const [file] = e.dataTransfer.files;
+    await readFile(file);
   };
 };
 
@@ -70,24 +93,32 @@ function DataFileInput() {
   const ref = useRef(document.createElement('div'));
   const readFile = useReadFile(FileManager.prepareOutput);
 
-  const dragEventHandler = useDragEventHandler(FileManager.prepareOutput);
+  const dropEventHandler = useDropEventHandler(FileManager.prepareOutput);
+  const [state, dragEventHandler] = useDragEventHandler();
 
   useEffect(() => {
     const node = ref.current;
     dragEvents.forEach(eventType =>
       node.addEventListener(eventType, dragEventHandler)
     );
-    return () =>
+    node.addEventListener('drop', dropEventHandler);
+    return () => {
       dragEvents.forEach(eventType =>
         node.removeEventListener(eventType, dragEventHandler)
       );
-  }, [dragEventHandler]);
+      node.removeEventListener('drop', dropEventHandler);
+    };
+  }, [dragEventHandler, dropEventHandler]);
 
   const handleInputChange = async e => {
     const [file] = e.target.files;
 
     await readFile(file);
   };
+
+  const labelClass = `${styles.inputDataField__label} ${
+    state.active ? 'active' : ''
+  }`;
 
   return (
     <div ref={ref} className={styles.inputDataField}>
@@ -99,7 +130,7 @@ function DataFileInput() {
         onChange={handleInputChange}
         className={styles.inputDataField__input}
       />
-      <label className={styles.inputDataField__label} htmlFor={FILE_INPUT_ID}>
+      <label className={labelClass} htmlFor={FILE_INPUT_ID}>
         <span>Drag your input file here or click in this area</span>
         <div className={styles.inputDataField__overlay} />
       </label>

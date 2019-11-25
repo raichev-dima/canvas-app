@@ -6,8 +6,6 @@ const StateContext = createContext(noop);
 const DispatchContext = createContext(noop);
 
 export const AppActions = {
-  DRAG_ENTER: 'DRAG_ENTER',
-  DRAG_LEAVE: 'DRAG_LEAVE',
   PROCESS_FILE_SUCCESS: 'PROCESS_FILE_SUCCESS',
   PROCESS_FILE_ERROR: 'PROCESS_FILE_ERROR',
   LOADING: 'LOADING',
@@ -15,10 +13,6 @@ export const AppActions = {
 
 function appReducer(state, action) {
   switch (action.type) {
-    case AppActions.DRAG_LEAVE:
-      return { ...state, activeClass: '' };
-    case AppActions.DRAG_ENTER:
-      return { ...state, activeClass: '' };
     case AppActions.PROCESS_FILE_SUCCESS:
       const { result, url } = action.payload;
       return { ...state, result, url };
