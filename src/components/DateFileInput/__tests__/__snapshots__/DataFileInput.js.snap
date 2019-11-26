@@ -12,7 +12,7 @@ exports[`<DataFileInput /> spec renders the component 1`] = `
       type="file"
     />
     <label
-      class="inputDataField__label"
+      class="inputDataField__label "
       for="file-input"
     >
       <span>

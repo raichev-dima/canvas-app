@@ -20,7 +20,7 @@ exports[`<App /> spec renders the component 1`] = `
           type="file"
         />
         <label
-          class="inputDataField__label"
+          class="inputDataField__label "
           for="file-input"
         >
           <span>
@@ -46,50 +46,12 @@ exports[`<App /> spec renders the component 1`] = `
         class="preview__container"
       >
         <div
-          class="spinner"
-          style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
-        >
-          <div
-            style="transform: rotate(0deg); animation-delay: -1.1s;"
-          />
-          <div
-            style="transform: rotate(30deg); animation-delay: -1s;"
-          />
-          <div
-            style="transform: rotate(60deg); animation-delay: -0.9000000000000001s;"
-          />
-          <div
-            style="transform: rotate(90deg); animation-delay: -0.8s;"
-          />
-          <div
-            style="transform: rotate(120deg); animation-delay: -0.7000000000000001s;"
-          />
-          <div
-            style="transform: rotate(150deg); animation-delay: -0.6000000000000001s;"
-          />
-          <div
-            style="transform: rotate(180deg); animation-delay: -0.5s;"
-          />
-          <div
-            style="transform: rotate(210deg); animation-delay: -0.4s;"
-          />
-          <div
-            style="transform: rotate(240deg); animation-delay: -0.30000000000000004s;"
-          />
-          <div
-            style="transform: rotate(270deg); animation-delay: -0.20000000000000007s;"
-          />
-          <div
-            style="transform: rotate(300deg); animation-delay: -0.10000000000000009s;"
-          />
-          <div
-            style="transform: rotate(330deg); animation-delay: 0s;"
-          />
-        </div>
-        <textarea
           class="preview__area"
-          readonly=""
-        />
+        >
+          <pre>
+            There is no data yet
+          </pre>
+        </div>
       </div>
     </form>
   </main>
