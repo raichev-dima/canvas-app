@@ -8,6 +8,7 @@
   width: inputDataFieldWidth;
   height: inputDataFieldHeight;
   transform: translateX(-50%);
+  user-select: none;
 }
 
 @mixin active() {
