@@ -1,9 +1,7 @@
 import React, { useReducer, useContext, createContext } from 'react';
 
-const noop = () => {};
-
-const StateContext = createContext(noop);
-const DispatchContext = createContext(noop);
+const StateContext = createContext(undefined);
+const DispatchContext = createContext(undefined);
 
 export const AppActions = {
   PROCESS_FILE_SUCCESS: 'PROCESS_FILE_SUCCESS',
