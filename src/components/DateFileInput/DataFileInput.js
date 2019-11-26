@@ -15,10 +15,11 @@ const dragEvents = [
   'dragenter',
   'dragleave',
   'dragexit',
+  'drop',
 ];
 
 const isEnterDragEvent = eventType => /dragover|dragenter/.test(eventType);
-const isLeaveDragEvent = eventType => /dragleave|dragexit/.test(eventType);
+const isLeaveDragEvent = eventType => /dragleave|dragexit|drop/.test(eventType);
 
 function noop() {}
 
@@ -112,6 +113,7 @@ function DataFileInput() {
 
   const handleInputChange = async e => {
     const [file] = e.target.files;
+    e.target.blur();
 
     await readFile(file);
   };
