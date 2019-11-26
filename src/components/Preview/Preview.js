@@ -2,6 +2,7 @@ import React from 'react';
 
 import styles from './Preview.module.scss';
 import Spinner from '../Spinner/Spinner';
+import { useAppState } from '../../AppProvider';
 
 const spinnerPosition = {
   position: 'absolute',
@@ -10,11 +11,19 @@ const spinnerPosition = {
   transform: 'translate(-50%, -50%)',
 };
 
-function Preview(props) {
+const Error = ({ children }) => <p style={{ color: 'red' }}>{children}</p>;
+
+function Preview() {
+  const state = useAppState();
+
+  const { loading = false, result = 'There is no data yet', error } = state;
+
   return (
     <div className={styles.preview__container}>
-      <Spinner style={spinnerPosition} />
-      <textarea className={styles.preview__area} readOnly={true} />
+      {loading && <Spinner style={spinnerPosition} />}
+      <div className={styles.preview__area}>
+        {error ? <Error>{error}</Error> : <pre>{result}</pre>}
+      </div>
     </div>
   );
 }

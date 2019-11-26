@@ -12,11 +12,10 @@
 .preview__area {
   width: inputDataFieldWidth;
   height: 50rem;
-  border: none;
   box-shadow: 0 2rem 6rem 1rem #747681;
   padding: 5px;
   font-family: Tahoma, sans-serif;
-  resize: none;
   background-color: #d5d5d5e0;
   cursor: initial;
+  overflow: auto;
 }
