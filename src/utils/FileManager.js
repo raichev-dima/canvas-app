@@ -70,6 +70,10 @@ async function prepareOutput(file) {
 
 function processInputFile(file) {
   return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error('You need to provide the input file'));
+    }
+
     if (file.type !== 'text/plain') {
       throw new Error(`Couldn't read the non-text format file`);
     }
