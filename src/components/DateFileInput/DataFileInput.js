@@ -20,8 +20,10 @@ const dragEvents = [
 const isEnterDragEvent = eventType => /dragover|dragenter/.test(eventType);
 const isLeaveDragEvent = eventType => /dragleave|dragexit/.test(eventType);
 
+function noop() {}
+
 function useReadFile(fileHandler) {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch() || noop;
 
   return async function(file) {
     dispatch({ type: AppActions.LOADING, payload: true });
@@ -33,8 +35,6 @@ function useReadFile(fileHandler) {
       });
     } catch (e) {
       dispatch({ type: AppActions.PROCESS_FILE_ERROR, payload: e.message });
-    } finally {
-      dispatch({ type: AppActions.LOADING, payload: false });
     }
   };
 }

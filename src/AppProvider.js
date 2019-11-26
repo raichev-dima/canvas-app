@@ -15,16 +15,18 @@ function appReducer(state, action) {
   switch (action.type) {
     case AppActions.PROCESS_FILE_SUCCESS:
       const { result, url } = action.payload;
-      return { ...state, result, url };
+      return { result, url, loading: false };
     case AppActions.PROCESS_FILE_ERROR:
-      return { ...state, error: action.payload };
+      return { error: action.payload, loading: false };
+    case AppActions.LOADING:
+      return { loading: action.payload };
     default:
       return state;
   }
 }
 
 function AppProvider({ children }) {
-  const [state, dispatch] = useReducer(appReducer, {});
+  const [state, dispatch] = useReducer(appReducer, { loading: false });
 
   return (
     <StateContext.Provider value={state}>
