@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useReducer } from 'react';
+import React, { useRef, useEffect, useReducer, useState } from 'react';
 
 import FileManager from '../../utils/FileManager';
 import SrOnly from '../SrOnly/SrOnly';
@@ -6,6 +6,7 @@ import styles from './DataFileInput.module.scss';
 import { useAppDispatch, AppActions } from '../../AppProvider';
 
 export const FILE_INPUT_ID = 'file-input';
+export const LABEL_TEXT = 'Drag your input file here or click in this area';
 
 const dragEvents = [
   'drag',
@@ -20,25 +21,6 @@ const dragEvents = [
 
 const isEnterDragEvent = eventType => /dragover|dragenter/.test(eventType);
 const isLeaveDragEvent = eventType => /dragleave|dragexit|drop/.test(eventType);
-
-function noop() {}
-
-function useReadFile(fileHandler) {
-  const dispatch = useAppDispatch() || noop;
-
-  return async function(file) {
-    dispatch({ type: AppActions.LOADING, payload: true });
-    try {
-      const [result, dataUrl] = await fileHandler(file);
-      dispatch({
-        type: AppActions.PROCESS_FILE_SUCCESS,
-        payload: { result, url: dataUrl },
-      });
-    } catch (e) {
-      dispatch({ type: AppActions.PROCESS_FILE_ERROR, payload: e.message });
-    }
-  };
-}
 
 export const DataFileInputActions = {
   DRAG_ENTER: 'DRAG_ENTER',
@@ -58,7 +40,7 @@ function dataFileInputReducer(state, action) {
 
 const useDragEventHandler = () => {
   const [state, dispatch] = useReducer(dataFileInputReducer, { active: false });
-  const handler = async e => {
+  const handler = e => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -78,44 +60,85 @@ const useDragEventHandler = () => {
   return [state, handler];
 };
 
-const useDropEventHandler = prepareOutput => {
-  const readFile = useReadFile(prepareOutput);
+async function readFile(file) {
+  try {
+    const [result, dataUrl] = await FileManager.prepareOutput(file);
 
-  return async e => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const [file] = e.dataTransfer.files;
-    await readFile(file);
-  };
-};
+    return { result, url: dataUrl };
+  } catch (error) {
+    throw error;
+  }
+}
 
 function DataFileInput() {
   const ref = useRef(document.createElement('div'));
-  const readFile = useReadFile(FileManager.prepareOutput);
 
-  const dropEventHandler = useDropEventHandler(FileManager.prepareOutput);
+  const [file, setFile] = useState();
+
   const [state, dragEventHandler] = useDragEventHandler();
+
+  const appDispatch = useAppDispatch();
 
   useEffect(() => {
     const node = ref.current;
+
+    const handleDrop = e => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const [file] = e.dataTransfer.files;
+
+      if (file) {
+        setFile(file);
+      }
+
+      e.target.blur();
+    };
+
     dragEvents.forEach(eventType =>
       node.addEventListener(eventType, dragEventHandler)
     );
-    node.addEventListener('drop', dropEventHandler);
+
+    node.addEventListener('drop', handleDrop);
+
     return () => {
       dragEvents.forEach(eventType =>
         node.removeEventListener(eventType, dragEventHandler)
       );
-      node.removeEventListener('drop', dropEventHandler);
+      node.removeEventListener('drop', handleDrop);
     };
-  }, [dragEventHandler, dropEventHandler]);
+  }, [dragEventHandler]);
 
-  const handleInputChange = async e => {
+  useEffect(() => {
+    if (file) {
+      appDispatch({ type: AppActions.LOADING, payload: true });
+
+      (async () => {
+        try {
+          const payload = await readFile(file);
+
+          appDispatch({
+            type: AppActions.PROCESS_FILE_SUCCESS,
+            payload,
+          });
+        } catch (error) {
+          appDispatch({
+            type: AppActions.PROCESS_FILE_ERROR,
+            payload: error.message,
+          });
+        }
+      })();
+    }
+  }, [file, appDispatch]);
+
+  const handleInputChange = e => {
     const [file] = e.target.files;
-    e.target.blur();
 
-    await readFile(file);
+    if (file) {
+      setFile(file);
+    }
+
+    e.target.blur();
   };
 
   const labelClass = `${styles.inputDataField__label} ${
@@ -133,7 +156,7 @@ function DataFileInput() {
         className={styles.inputDataField__input}
       />
       <label className={labelClass} htmlFor={FILE_INPUT_ID}>
-        <span>Drag your input file here or click in this area</span>
+        <span>{LABEL_TEXT}</span>
         <div className={styles.inputDataField__overlay} />
       </label>
     </div>

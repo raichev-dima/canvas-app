@@ -23,8 +23,8 @@ function appReducer(state, action) {
   }
 }
 
-function AppProvider({ children }) {
-  const [state, dispatch] = useReducer(appReducer, { loading: false });
+function AppProvider({ children, state: initialState = { loading: false } }) {
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
   return (
     <StateContext.Provider value={state}>
