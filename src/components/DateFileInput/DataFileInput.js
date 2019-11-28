@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useReducer, useState } from 'react';
 
-import FileManager from '../../utils/FileManager';
 import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
 import { useAppDispatch, AppActions } from '../../AppProvider';
+import WebWorker from '../../worker';
 
 export const FILE_INPUT_ID = 'file-input';
 export const LABEL_TEXT = 'Drag your input file here or click in this area';
@@ -60,24 +60,39 @@ const useDragEventHandler = () => {
   return [state, handler];
 };
 
-async function readFile(file) {
-  try {
-    const [result, dataUrl, snapshot] = await FileManager.prepareOutput(file);
-
-    return { result, url: dataUrl, snapshot };
-  } catch (error) {
-    throw error;
-  }
-}
-
 function DataFileInput() {
   const ref = useRef(document.createElement('div'));
+  const workerRef = useRef(new WebWorker());
 
   const [file, setFile] = useState();
 
   const [state, dragEventHandler] = useDragEventHandler();
 
   const appDispatch = useAppDispatch();
+
+  useEffect(() => {
+    const thisWorker = workerRef.current;
+    const successHandler = ({ data }) => {
+      appDispatch({
+        type: AppActions.PROCESS_FILE_SUCCESS,
+        payload: data,
+      });
+    };
+
+    const errorHandler = error => {
+      appDispatch({
+        type: AppActions.PROCESS_FILE_ERROR,
+        payload: error.message,
+      });
+    };
+
+    thisWorker.addEventListener('message', successHandler);
+    thisWorker.addEventListener('error', errorHandler);
+    return () => {
+      thisWorker.removeEventListener('message', successHandler);
+      thisWorker.removeEventListener('error', errorHandler);
+    };
+  }, [appDispatch]);
 
   useEffect(() => {
     const node = ref.current;
@@ -113,21 +128,7 @@ function DataFileInput() {
     if (file) {
       appDispatch({ type: AppActions.LOADING, payload: true });
 
-      (async () => {
-        try {
-          const payload = await readFile(file);
-
-          appDispatch({
-            type: AppActions.PROCESS_FILE_SUCCESS,
-            payload,
-          });
-        } catch (error) {
-          appDispatch({
-            type: AppActions.PROCESS_FILE_ERROR,
-            payload: error.message,
-          });
-        }
-      })();
+      workerRef.current.postMessage([file]);
     }
   }, [file, appDispatch]);
 
