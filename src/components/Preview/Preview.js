@@ -16,13 +16,13 @@ const Error = ({ children }) => <p style={{ color: 'red' }}>{children}</p>;
 function Preview() {
   const state = useAppState();
 
-  const { loading = false, result = 'There is no data yet', error } = state;
+  const { loading = false, snapshot = 'There is no data yet', error } = state;
 
   return (
     <div className={styles.preview__container}>
       {loading && <Spinner style={spinnerPosition} />}
       <div className={styles.preview__area}>
-        {error ? <Error>{error}</Error> : <pre>{result}</pre>}
+        {error ? <Error>{error}</Error> : <pre>{snapshot}</pre>}
       </div>
     </div>
   );

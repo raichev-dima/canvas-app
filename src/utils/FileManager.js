@@ -49,23 +49,26 @@ export function processInputString(str) {
   try {
     const actions = str.split('\n').filter(action => action.length);
     let result = '';
+    let snapshot;
 
+    // iterate until the last action to get final snapshot
     while (actions.length) {
       const [next, ...args] = actions.shift().split(' ');
-      result = `${result}${performActionOnCanvas(next, ...args)}\n`;
+      snapshot = performActionOnCanvas(next, ...args);
+      result = `${result}${snapshot}\n`;
     }
 
-    return result;
+    return [result, snapshot];
   } catch (e) {
     throw new Error(`Couldn't process the input: ${e.message}`);
   }
 }
 
 async function prepareOutput(file) {
-  const result = await processInputFile(file);
+  const [result, snapshot] = await processInputFile(file);
   const blob = new File([result], 'output.txt');
 
-  return [result, URL.createObjectURL(blob)];
+  return [result, URL.createObjectURL(blob), snapshot];
 }
 
 function processInputFile(file) {

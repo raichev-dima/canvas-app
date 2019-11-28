@@ -20,7 +20,7 @@ describe('parseInputString', () => {
     const input = await readFile('../../../examples/input.txt');
     const output = await readFile('../../../examples/output.txt');
 
-    const result = FileManager.processInputString(input);
+    const [result] = FileManager.processInputString(input);
 
     expect(result).toBe(output);
   });

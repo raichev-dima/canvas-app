@@ -62,9 +62,9 @@ const useDragEventHandler = () => {
 
 async function readFile(file) {
   try {
-    const [result, dataUrl] = await FileManager.prepareOutput(file);
+    const [result, dataUrl, snapshot] = await FileManager.prepareOutput(file);
 
-    return { result, url: dataUrl };
+    return { result, url: dataUrl, snapshot };
   } catch (error) {
     throw error;
   }

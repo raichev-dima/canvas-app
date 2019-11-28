@@ -58,9 +58,9 @@ describe('<DataFileInput /> spec', () => {
       type: 'text/plain',
     });
 
-    const successResult = (await FileManager.processInputString('C 12 12'))
-      .replace(/\s+/g, ' ')
-      .trimEnd();
+    const [successResultRaw] = await FileManager.processInputString('C 12 12');
+
+    const successResult = successResultRaw.replace(/\s+/g, ' ').trimEnd();
 
     const errorFile = new File(['wrong!'], 'input.txt', {
       type: 'text/plain',
@@ -118,6 +118,7 @@ describe('<DataFileInput /> spec', () => {
     await wait(() => {
       expect(resultStateContainer).toHaveTextContent(successResult);
       expect(loadingStateContainer).toHaveTextContent('false');
+      expect(URL.createObjectURL).toHaveBeenCalled();
     });
 
     fileInput.files = [errorFile];
@@ -130,6 +131,7 @@ describe('<DataFileInput /> spec', () => {
         "Couldn't read the file: Couldn't process the input: Couldn't perform unknown action on canvas"
       );
       expect(loadingStateContainer).toHaveTextContent('false');
+      expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
     });
 
     done();

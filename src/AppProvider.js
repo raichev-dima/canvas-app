@@ -12,8 +12,8 @@ export const AppActions = {
 function appReducer(state, action) {
   switch (action.type) {
     case AppActions.PROCESS_FILE_SUCCESS:
-      const { result, url } = action.payload;
-      return { result, url, loading: false };
+      const { result, url, snapshot } = action.payload;
+      return { result, url, snapshot, loading: false };
     case AppActions.PROCESS_FILE_ERROR:
       return { error: action.payload, loading: false };
     case AppActions.LOADING:
