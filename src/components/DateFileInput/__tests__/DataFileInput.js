@@ -11,6 +11,8 @@ import DataFileInput, { FILE_INPUT_ID, LABEL_TEXT } from '../DataFileInput';
 import AppProvider, { useAppState, AppActions } from '../../../AppProvider';
 import FileManager from '../../../utils/FileManager';
 
+jest.mock('../../../processFile.worker.js');
+
 describe('<DataFileInput /> spec', () => {
   describe('render', () => {
     let rendered;

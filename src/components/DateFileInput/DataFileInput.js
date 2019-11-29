@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useReducer, useState } from 'react';
 import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
 import { useAppDispatch, AppActions } from '../../AppProvider';
-import WebWorker from '../../worker';
+import WebWorker from '../../processFile.worker';
 
 export const FILE_INPUT_ID = 'file-input';
 export const LABEL_TEXT = 'Drag your input file here or click in this area';
@@ -96,8 +96,7 @@ function DataFileInput() {
     thisWorker.addEventListener('message', messageHandler);
     thisWorker.addEventListener('error', errorHandler);
     return () => {
-      thisWorker.removeEventListener('message', messageHandler);
-      thisWorker.removeEventListener('error', errorHandler);
+      thisWorker.terminate();
     };
   }, [appDispatch]);
 

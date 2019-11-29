@@ -51,7 +51,6 @@ export function processInputString(str) {
     let result = '';
     let snapshot;
 
-    // iterate until the last action to get final snapshot
     while (actions.length) {
       const [next, ...args] = actions.shift().split(' ');
       snapshot = performActionOnCanvas(next, ...args);
@@ -94,6 +93,22 @@ function processInputFile(file) {
 
     reader.readAsText(file);
   });
+}
+
+export function createInputHandler(postMessage) {
+  return async e => {
+    if (!e) return;
+
+    const file = e.data[0];
+
+    try {
+      const [result, dataUrl, snapshot] = await prepareOutput(file);
+
+      postMessage({ result, url: dataUrl, snapshot });
+    } catch (error) {
+      postMessage({ error });
+    }
+  };
 }
 
 export default {
