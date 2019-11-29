@@ -12,6 +12,6 @@ self.addEventListener('message', async e => {
 
     postMessage({ result, url: dataUrl, snapshot });
   } catch (error) {
-    throw error;
+    postMessage({ error });
   }
 });

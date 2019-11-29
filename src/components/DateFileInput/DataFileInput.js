@@ -72,24 +72,31 @@ function DataFileInput() {
 
   useEffect(() => {
     const thisWorker = workerRef.current;
-    const successHandler = ({ data }) => {
-      appDispatch({
-        type: AppActions.PROCESS_FILE_SUCCESS,
-        payload: data,
-      });
+    const messageHandler = ({ data }) => {
+      const { error, ...payload } = data;
+
+      if (!error) {
+        appDispatch({
+          type: AppActions.PROCESS_FILE_SUCCESS,
+          payload,
+        });
+      } else {
+        appDispatch({
+          type: AppActions.PROCESS_FILE_ERROR,
+          payload: error,
+        });
+      }
     };
 
     const errorHandler = error => {
-      appDispatch({
-        type: AppActions.PROCESS_FILE_ERROR,
-        payload: error.message,
-      });
+      error.preventDefault();
+      thisWorker.terminate();
     };
 
-    thisWorker.addEventListener('message', successHandler);
+    thisWorker.addEventListener('message', messageHandler);
     thisWorker.addEventListener('error', errorHandler);
     return () => {
-      thisWorker.removeEventListener('message', successHandler);
+      thisWorker.removeEventListener('message', messageHandler);
       thisWorker.removeEventListener('error', errorHandler);
     };
   }, [appDispatch]);
