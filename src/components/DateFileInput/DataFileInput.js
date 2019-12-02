@@ -2,8 +2,9 @@ import React, { useRef, useEffect, useReducer, useState } from 'react';
 
 import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
-import { useAppDispatch, AppActions } from '../../AppProvider';
+import { useAppDispatch, useAppState, AppActions } from '../../AppProvider';
 import WebWorker from '../../processFile.worker';
+import ProgressBar from '../ProgressBar/ProgressBar';
 
 export const FILE_INPUT_ID = 'file-input';
 export const LABEL_TEXT = 'Drag your input file here or click in this area';
@@ -69,16 +70,22 @@ function DataFileInput() {
   const [state, dragEventHandler] = useDragEventHandler();
 
   const appDispatch = useAppDispatch();
+  const appState = useAppState();
 
   useEffect(() => {
     const thisWorker = workerRef.current;
     const messageHandler = ({ data }) => {
-      const { error, ...payload } = data;
+      const { error, progress, ...payload } = data;
 
-      if (!error) {
+      if (!error && !progress) {
         appDispatch({
           type: AppActions.PROCESS_FILE_SUCCESS,
           payload,
+        });
+      } else if (progress) {
+        appDispatch({
+          type: AppActions.PROGRESS_CHANGE,
+          payload: progress,
         });
       } else {
         appDispatch({
@@ -104,8 +111,13 @@ function DataFileInput() {
     const node = ref.current;
 
     const handleDrop = e => {
+      if (appState.loading) {
+        return;
+      }
+
       e.preventDefault();
       e.stopPropagation();
+      appDispatch({ type: AppActions.RESET });
 
       const [file] = e.dataTransfer.files;
 
@@ -128,7 +140,7 @@ function DataFileInput() {
       );
       node.removeEventListener('drop', handleDrop);
     };
-  }, [dragEventHandler]);
+  }, [appDispatch, appState.loading, dragEventHandler]);
 
   useEffect(() => {
     if (file) {
@@ -138,7 +150,18 @@ function DataFileInput() {
     }
   }, [file, appDispatch]);
 
+  const [loading, setLoading] = useState(false);
+
+  // Delay a loading indicator by a half a sec
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoading(appState.loading);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [appState.loading]);
+
   const handleInputChange = e => {
+    appDispatch({ type: AppActions.RESET });
     const [file] = e.target.files;
 
     if (file) {
@@ -149,8 +172,15 @@ function DataFileInput() {
   };
 
   const labelClass = `${styles.inputDataField__label} ${
-    state.active ? 'active' : ''
+    state.active && !loading ? 'active' : ''
   }`;
+
+  const labelStyle = loading
+    ? {
+        cursor: 'not-allowed',
+        opacity: 0.7,
+      }
+    : {};
 
   return (
     <div ref={ref} className={styles.inputDataField}>
@@ -161,10 +191,12 @@ function DataFileInput() {
         accept=".txt"
         onChange={handleInputChange}
         className={styles.inputDataField__input}
+        disabled={appState.loading} // disable input right after loading event without any delay
       />
-      <label className={labelClass} htmlFor={FILE_INPUT_ID}>
+      <label className={labelClass} htmlFor={FILE_INPUT_ID} style={labelStyle}>
         <span>{LABEL_TEXT}</span>
         <div className={styles.inputDataField__overlay} />
+        {loading && <ProgressBar progress={appState.progress} />}
       </label>
     </div>
   );

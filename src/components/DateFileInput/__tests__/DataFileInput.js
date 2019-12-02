@@ -8,7 +8,11 @@ import {
   wait,
 } from '@testing-library/react';
 import DataFileInput, { FILE_INPUT_ID, LABEL_TEXT } from '../DataFileInput';
-import AppProvider, { useAppState, AppActions } from '../../../AppProvider';
+import AppProvider, {
+  useAppState,
+  AppActions,
+  initialAppState,
+} from '../../../AppProvider';
 import FileManager from '../../../utils/FileManager';
 
 jest.mock('../../../processFile.worker.js');
@@ -136,6 +140,40 @@ describe('<DataFileInput /> spec', () => {
       expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
     });
 
+    done();
+  });
+
+  it('should reset state after change event', async done => {
+    const Component = () => {
+      const state = useAppState();
+
+      return (
+        <>
+          <span data-testid={AppActions.RESET}>
+            {`${state.loading.toString()}${state.progress.toString()}`}
+          </span>
+        </>
+      );
+    };
+
+    const { container } = render(
+      <AppProvider state={{ loading: true, progress: 1234 }}>
+        <DataFileInput />
+        <Component />
+      </AppProvider>
+    );
+
+    const fileInput = getByLabelText(container, LABEL_TEXT);
+
+    fireEvent.change(fileInput);
+
+    const resetStateContainer = getByTestId(container, AppActions.RESET);
+
+    await wait(() => {
+      expect(resetStateContainer).toHaveTextContent(
+        `${initialAppState.loading.toString()}${initialAppState.progress.toString()}`
+      );
+    });
     done();
   });
 });

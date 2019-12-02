@@ -10,6 +10,8 @@ const Pixels = {
   Empty: Symbol(' '),
 };
 
+function noop() {}
+
 function symbolToString(symbol) {
   // eslint-disable-next-line no-unused-vars
   const [_, match] = symbol.toString().match(/^Symbol\(([\w ]+)\)$/);
@@ -105,7 +107,7 @@ class Canvas {
     return matrixToString(this._matrix);
   }
 
-  drawLine(x1, y1, x2, y2) {
+  drawLine(x1, y1, x2, y2, getProgressPercentage = noop) {
     const isVertical = x1 === x2;
     const isHorizontal = y1 === y2;
 
@@ -127,11 +129,19 @@ class Canvas {
       );
     }
 
+    const getProgress = (i, start, end) => {
+      const steps = end - start + 1;
+
+      return ((i - start) / steps) * 100;
+    };
+
     if (isVertical) {
       let [start, end] = createVectorByCoordinates(y1, y2);
 
       for (let i = start; i <= end; ++i) {
         this._setPixel(x1, i, Pixels.Point);
+        const progress = getProgress(i, start, end);
+        getProgressPercentage(progress);
       }
     }
 
@@ -140,22 +150,24 @@ class Canvas {
 
       for (let i = start; i <= end; ++i) {
         this._setPixel(i, y1, Pixels.Point);
+        const progress = getProgress(i, start, end);
+        getProgressPercentage(progress);
       }
     }
   }
 
-  drawRectangle(x1, y1, x2, y2) {
+  drawRectangle(x1, y1, x2, y2, getProgressPercentage = noop) {
     try {
-      this.drawLine(x1, y1, x2, y1);
-      this.drawLine(x2, y1, x2, y2);
-      this.drawLine(x2, y2, x1, y2);
-      this.drawLine(x1, y2, x1, y1);
+      this.drawLine(x1, y1, x2, y1, getProgressPercentage);
+      this.drawLine(x2, y1, x2, y2, getProgressPercentage);
+      this.drawLine(x2, y2, x1, y2, getProgressPercentage);
+      this.drawLine(x1, y2, x1, y1, getProgressPercentage);
     } catch (e) {
       throw new Error(`${Exceptions.Rectangle}: ${e.message}`);
     }
   }
 
-  fill(x, y, colorInput) {
+  fill(x, y, colorInput, getProgressPercentage = noop) {
     if (!checkIfAllValuesAreTruthy(x, y, colorInput)) {
       throw new Error(
         `${Exceptions.BucketFill}: likely you forgot to provide some values`
@@ -185,6 +197,12 @@ class Canvas {
       ) {
         const pixel = this._getPixel(x, y);
         visitedPixels[pixelKey] = true;
+
+        // The value is approximate as we don't know a number of iterations in advance
+        getProgressPercentage(
+          (Object.keys(visitedPixels).length / (this._height * this._width)) *
+            100
+        );
 
         if (pixel !== Pixels.Point) {
           this._setPixel(x, y, color);

@@ -102,6 +102,28 @@ describe('Canvas', () => {
 
       expect(canvas.print()).toEqual(result);
     });
+
+    it('should handle progress percentage', () => {
+      /**
+        -------
+        |     |
+        |     |
+        |x    |
+        |x    |
+        |x    |
+        |x    |
+        -------
+
+       */
+
+      const getProgressPercentage = jest.fn();
+      canvas.drawLine(1, 3, 1, 6, getProgressPercentage);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(1, 0);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(2, (1 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(3, (2 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(4, (3 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenCalledTimes(4);
+    });
   });
 
   describe('drawRectangle', () => {
@@ -136,6 +158,43 @@ describe('Canvas', () => {
       canvas.drawRectangle(1, 6, 1, 6);
 
       expect(canvas.print()).toEqual(result);
+    });
+
+    it('should handle progress percentage', () => {
+      const result =
+        '-------\n' +
+        '|xxxx |\n' +
+        '|x  x |\n' +
+        '|xxxx |\n' +
+        '|     |\n' +
+        '|     |\n' +
+        '|     |\n' +
+        '-------';
+
+      const getProgressPercentage = jest.fn();
+      canvas.drawRectangle(1, 1, 4, 3, getProgressPercentage);
+
+      expect(canvas.print()).toEqual(result);
+
+      expect(getProgressPercentage).toHaveBeenCalledTimes(14);
+
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(1, 0);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(2, (1 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(3, (2 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(4, (3 / 4) * 100);
+
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(5, 0);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(6, (1 / 3) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(7, (2 / 3) * 100);
+
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(8, 0);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(9, (1 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(10, (2 / 4) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(11, (3 / 4) * 100);
+
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(12, 0);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(13, (1 / 3) * 100);
+      expect(getProgressPercentage).toHaveBeenNthCalledWith(14, (2 / 3) * 100);
     });
   });
 
@@ -208,6 +267,35 @@ describe('Canvas', () => {
       canvas.fill(2, 2, 's');
 
       expect(canvas.print()).toEqual(result2);
+    });
+
+    it('should handle progress percentage', () => {
+      canvas = Canvas.create(5, 6);
+      const result =
+        '-------\n' +
+        '|xxxx |\n' +
+        '|xoox |\n' +
+        '|xoox |\n' +
+        '|xxxx |\n' +
+        '|     |\n' +
+        '|     |\n' +
+        '-------';
+
+      const getProgressPercentage = jest.fn();
+      canvas.drawRectangle(1, 1, 4, 4);
+      canvas.fill(2, 2, 'o', getProgressPercentage);
+      expect(canvas.print()).toEqual(result);
+
+      expect(getProgressPercentage).toHaveBeenCalledTimes(12);
+
+      Array(12)
+        .fill(1)
+        .forEach((_, i) => {
+          expect(getProgressPercentage).toHaveBeenNthCalledWith(
+            i + 1,
+            ((i + 1) / (5 * 6)) * 100
+          );
+        });
     });
   });
 });
