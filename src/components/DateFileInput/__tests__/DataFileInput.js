@@ -18,9 +18,9 @@ import FileManager from '../../../utils/FileManager';
 jest.mock('../../../processFile.worker.js');
 
 describe('<DataFileInput /> spec', () => {
+  afterEach(cleanup);
   describe('render', () => {
     let rendered;
-    afterEach(cleanup);
     beforeEach(() => {
       rendered = render(
         <AppProvider>
@@ -59,20 +59,12 @@ describe('<DataFileInput /> spec', () => {
     done();
   });
 
-  it('should handle change event', async done => {
+  describe('change events handlers', () => {
     const successFile = new File(['C 12 12'], 'input.txt', {
       type: 'text/plain',
     });
 
-    const [successResultRaw] = await FileManager.processInputString('C 12 12');
-
-    const successResult = successResultRaw.replace(/\s+/g, ' ').trimEnd();
-
-    const errorFile = new File(['wrong!'], 'input.txt', {
-      type: 'text/plain',
-    });
-
-    URL.createObjectURL = jest.fn();
+    let successResult;
 
     const Component = () => {
       const state = useAppState();
@@ -90,57 +82,106 @@ describe('<DataFileInput /> spec', () => {
       );
     };
 
-    const { container } = render(
-      <AppProvider>
-        <DataFileInput />
-        <Component />
-      </AppProvider>
-    );
+    let container,
+      errorStateContainer,
+      resultStateContainer,
+      loadingStateContainer,
+      fileInput;
 
-    const fileInput = getByLabelText(container, LABEL_TEXT);
-    fileInput.blur = jest.fn();
-
-    Object.defineProperty(fileInput, 'files', {
-      value: [successFile],
-      writable: true,
-    });
-
-    fireEvent.change(fileInput);
-    expect(fileInput.blur).toHaveBeenCalled();
-
-    const errorStateContainer = getByTestId(
-      container,
-      AppActions.PROCESS_FILE_ERROR
-    );
-
-    const resultStateContainer = getByTestId(
-      container,
-      AppActions.PROCESS_FILE_SUCCESS
-    );
-
-    const loadingStateContainer = getByTestId(container, AppActions.LOADING);
-    expect(loadingStateContainer).toHaveTextContent('true');
-
-    await wait(() => {
-      expect(resultStateContainer).toHaveTextContent(successResult);
-      expect(loadingStateContainer).toHaveTextContent('false');
-      expect(URL.createObjectURL).toHaveBeenCalled();
-    });
-
-    fileInput.files = [errorFile];
-
-    fireEvent.change(fileInput);
-    expect(loadingStateContainer).toHaveTextContent('true');
-
-    await wait(() => {
-      expect(errorStateContainer).toHaveTextContent(
-        "Couldn't read the file: Couldn't process the input: Couldn't perform unknown action on canvas"
+    beforeEach(async () => {
+      const [successResultRaw] = await FileManager.processInputString(
+        'C 12 12'
       );
-      expect(loadingStateContainer).toHaveTextContent('false');
-      expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+      successResult = successResultRaw.replace(/\s+/g, ' ').trimEnd();
+
+      const result = render(
+        <AppProvider>
+          <DataFileInput data-testid={'data-file-input'} />
+          <Component />
+        </AppProvider>
+      );
+
+      container = result.container;
+
+      errorStateContainer = getByTestId(
+        container,
+        AppActions.PROCESS_FILE_ERROR
+      );
+
+      resultStateContainer = getByTestId(
+        container,
+        AppActions.PROCESS_FILE_SUCCESS
+      );
+
+      loadingStateContainer = getByTestId(container, AppActions.LOADING);
+
+      fileInput = getByLabelText(container, LABEL_TEXT);
+      fileInput.blur = jest.fn();
+      URL.createObjectURL = jest.fn();
     });
 
-    done();
+    const errorFile = new File(['wrong!'], 'input.txt', {
+      type: 'text/plain',
+    });
+
+    it('should handle change event', async done => {
+      const fileInput = getByLabelText(container, LABEL_TEXT);
+      fileInput.blur = jest.fn();
+
+      Object.defineProperty(fileInput, 'files', {
+        value: [successFile],
+        writable: true,
+      });
+
+      fireEvent.change(fileInput);
+      expect(fileInput.blur).toHaveBeenCalled();
+
+      expect(loadingStateContainer).toHaveTextContent('true');
+
+      await wait(() => {
+        expect(resultStateContainer).toHaveTextContent(successResult);
+        expect(loadingStateContainer).toHaveTextContent('false');
+        expect(URL.createObjectURL).toHaveBeenCalled();
+      });
+
+      fileInput.files = [errorFile];
+
+      fireEvent.change(fileInput);
+      expect(loadingStateContainer).toHaveTextContent('true');
+
+      await wait(() => {
+        expect(errorStateContainer).toHaveTextContent(
+          "Couldn't read the file: Couldn't process the input: Couldn't perform unknown action on canvas"
+        );
+        expect(loadingStateContainer).toHaveTextContent('false');
+        expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+      });
+
+      done();
+    });
+
+    it('should handle drop event', async done => {
+      const mockDropEvent = new Event('drop');
+      Object.defineProperty(mockDropEvent, 'dataTransfer', {
+        value: {
+          files: [successFile],
+        },
+      });
+
+      const dataFileInput = getByTestId(container, 'data-file-input');
+
+      fireEvent(dataFileInput, mockDropEvent);
+
+      expect(loadingStateContainer).toHaveTextContent('true');
+
+      await wait(() => {
+        expect(resultStateContainer).toHaveTextContent(successResult);
+        expect(loadingStateContainer).toHaveTextContent('false');
+        expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+      });
+
+      done();
+    });
   });
 
   it('should reset state after change event', async done => {

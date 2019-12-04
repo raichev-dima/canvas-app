@@ -61,7 +61,7 @@ const useDragEventHandler = () => {
   return [state, handler];
 };
 
-function DataFileInput() {
+function DataFileInput(props) {
   const ref = useRef(document.createElement('div'));
   const workerRef = useRef(new WebWorker());
 
@@ -183,7 +183,7 @@ function DataFileInput() {
     : {};
 
   return (
-    <div ref={ref} className={styles.inputDataField}>
+    <div ref={ref} className={styles.inputDataField} {...props}>
       <SrOnly
         is="input"
         type="file"
