@@ -52,6 +52,7 @@ describe('Canvas', () => {
       expect(() => canvas.drawLine(2, 3, 2, 6)).not.toThrow();
       expect(() => canvas.drawLine(1, 3, 2, 8)).toThrow();
       expect(() => canvas.drawLine(5, 6, 2, 6)).not.toThrow();
+      expect(() => canvas.drawLine(5, 6, 2, 3)).toThrow();
     });
 
     it('should draw a vertical line', () => {

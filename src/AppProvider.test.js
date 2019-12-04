@@ -28,6 +28,9 @@ function Component() {
           payload: { result, url },
         });
         break;
+      case AppActions.PROGRESS_CHANGE:
+        dispatch({ type: AppActions.PROGRESS_CHANGE, payload: 42 });
+        break;
       default:
     }
   };
@@ -40,9 +43,12 @@ function Component() {
       </span>
       <span data-testid={AppActions.PROCESS_FILE_ERROR}>{`${state.error ||
         ''}`}</span>
+      <span data-testid={AppActions.PROGRESS_CHANGE}>{`${state.progress ||
+      ''}`}</span>
       <button id={AppActions.PROCESS_FILE_SUCCESS} onClick={handleClick} />
       <button id={AppActions.PROCESS_FILE_ERROR} onClick={handleClick} />
       <button id={AppActions.LOADING} onClick={handleClick} />
+      <button id={AppActions.PROGRESS_CHANGE} onClick={handleClick} />
     </>
   );
 }
@@ -106,9 +112,12 @@ describe('<AppProvider /> spec', () => {
 
     const loadingButton = container.querySelector(`#${AppActions.LOADING}`);
 
+    const progressButton = container.querySelector(`#${AppActions.PROGRESS_CHANGE}`);
+
     const loadingSpan = getByTestId(container, AppActions.LOADING);
     const successSpan = getByTestId(container, AppActions.PROCESS_FILE_SUCCESS);
     const errorSpan = getByTestId(container, AppActions.PROCESS_FILE_ERROR);
+    const progressSpan = getByTestId(container, AppActions.PROGRESS_CHANGE);
 
     expect(loadingSpan.innerHTML).toBe('false');
     expect(successSpan.innerHTML).toBe('');
@@ -128,5 +137,8 @@ describe('<AppProvider /> spec', () => {
     expect(loadingSpan.innerHTML).toBe('false');
     expect(successSpan.innerHTML).toBe(`${result} ${url}`);
     expect(errorSpan.innerHTML).toBe('');
+
+    fireEvent.click(progressButton);
+    expect(progressSpan.innerHTML).toBe('42');
   });
 });

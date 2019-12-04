@@ -1,4 +1,3 @@
-import throttle from 'lodash.throttle';
 import Canvas from './Canvas';
 
 function noop() {}
@@ -19,32 +18,33 @@ const stringsToIntegers = strings =>
     }
   });
 
-let canvas;
-
-function performActionOnCanvas(type, getProcessPercentage, ...args) {
-  if (type === ActionTypes.CREATE_CANVAS) {
-    canvas = Canvas.create(...stringsToIntegers(args));
-    return canvas.print();
-  }
-
-  if (!canvas) {
-    throw new Error(`Couldn't paint on non-existent canvas`);
-  }
-
-  switch (type) {
-    case ActionTypes.DRAW_LINE:
-      canvas.drawLine(...stringsToIntegers(args), getProcessPercentage);
+function createPerformActionOnCanvas() {
+  let canvas;
+  return function performActionOnCanvas(type, getProcessPercentage, ...args) {
+    if (type === ActionTypes.CREATE_CANVAS) {
+      canvas = Canvas.create(...stringsToIntegers(args));
       return canvas.print();
-    case ActionTypes.DRAW_RECTANGLE:
-      canvas.drawRectangle(...stringsToIntegers(args), getProcessPercentage);
-      return canvas.print();
-    case ActionTypes.BUCKET_FILL:
-      const color = args.slice(-1);
-      const others = args.slice(0, -1);
-      canvas.fill(...stringsToIntegers(others), color, getProcessPercentage);
-      return canvas.print();
-    default:
-      throw new Error(`Couldn't perform unknown action on canvas`);
+    }
+
+    if (!canvas) {
+      throw new Error(`Couldn't paint on non-existent canvas`);
+    }
+
+    switch (type) {
+      case ActionTypes.DRAW_LINE:
+        canvas.drawLine(...stringsToIntegers(args), getProcessPercentage);
+        return canvas.print();
+      case ActionTypes.DRAW_RECTANGLE:
+        canvas.drawRectangle(...stringsToIntegers(args), getProcessPercentage);
+        return canvas.print();
+      case ActionTypes.BUCKET_FILL:
+        const color = args.slice(-1);
+        const others = args.slice(0, -1);
+        canvas.fill(...stringsToIntegers(others), color, getProcessPercentage);
+        return canvas.print();
+      default:
+        throw new Error(`Couldn't perform unknown action on canvas`);
+    }
   }
 }
 
@@ -61,6 +61,7 @@ export function processInputString(str, onProgressPercentageChange = noop) {
       onProgressPercentageChange(progress);
     }
 
+    const performActionOnCanvas = createPerformActionOnCanvas();
     while (actions.length) {
       const [next, ...args] = actions.shift().split(' ');
       snapshot = performActionOnCanvas(next, getProgressPercentage, ...args);
@@ -121,7 +122,7 @@ export function createInputHandler(postMessage) {
     try {
       const [result, dataUrl, snapshot] = await prepareOutput(
         file,
-        throttle(onProgressPercentageChange, 1000)
+        onProgressPercentageChange
       );
 
       postMessage({ result, url: dataUrl, snapshot });

@@ -28,6 +28,7 @@ describe('<DataFileInput /> spec', () => {
         </AppProvider>
       );
     });
+
     it('should render the component', done => {
       const { container } = rendered;
       expect(container).toMatchSnapshot();
@@ -151,7 +152,7 @@ describe('<DataFileInput /> spec', () => {
 
       await wait(() => {
         expect(errorStateContainer).toHaveTextContent(
-          "Couldn't read the file: Couldn't process the input: Couldn't perform unknown action on canvas"
+          "Couldn't read the file: Couldn't process the input: Couldn't paint on non-existent canvas"
         );
         expect(loadingStateContainer).toHaveTextContent('false');
         expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
@@ -178,6 +179,52 @@ describe('<DataFileInput /> spec', () => {
         expect(resultStateContainer).toHaveTextContent(successResult);
         expect(loadingStateContainer).toHaveTextContent('false');
         expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+      });
+
+      done();
+    });
+
+    it('should not handle drop event while loading', async done => {
+      const mockDropEvent = new Event('drop');
+      Object.defineProperty(mockDropEvent, 'dataTransfer', {
+        value: {
+          files: [successFile],
+        },
+      });
+
+      Object.defineProperty(mockDropEvent, 'preventDefault', {
+        value: jest.fn(),
+      });
+
+      Object.defineProperty(mockDropEvent, 'stopPropagation', {
+        value: jest.fn(),
+      });
+
+      const result = render(
+        <AppProvider state={{ loading: true }}>
+          <DataFileInput data-testid={'data-file-input'} />
+          <Component />
+        </AppProvider>
+      );
+
+      let container = result.container;
+
+      resultStateContainer = getByTestId(
+        container,
+        AppActions.PROCESS_FILE_SUCCESS
+      );
+
+      loadingStateContainer = getByTestId(container, AppActions.LOADING);
+
+      const dataFileInput = getByTestId(container, 'data-file-input');
+      fireEvent(dataFileInput, mockDropEvent);
+
+      await wait(() => {
+        expect(mockDropEvent.preventDefault).toHaveBeenCalled();
+        expect(mockDropEvent.stopPropagation).toHaveBeenCalled();
+        expect(resultStateContainer).toHaveTextContent('');
+        expect(loadingStateContainer).toHaveTextContent('true');
+        expect(URL.createObjectURL).not.toHaveBeenCalledTimes(1);
       });
 
       done();
@@ -215,6 +262,36 @@ describe('<DataFileInput /> spec', () => {
         `${initialAppState.loading.toString()}${initialAppState.progress.toString()}`
       );
     });
+    done();
+  });
+
+  it('should handle progress change', async done => {
+    URL.createObjectURL = jest.fn();
+    const dispatchProgress = jest.fn();
+
+    const { container } = render(
+      <AppProvider>
+        <DataFileInput dispatchProgress={dispatchProgress} />
+      </AppProvider>
+    );
+
+    const fileInput = getByLabelText(container, LABEL_TEXT);
+
+    const file = new File(['C 7 7\nL 1 3 1 6'], 'input.txt', {
+      type: 'text/plain',
+    });
+
+    Object.defineProperty(fileInput, 'files', {
+      value: [file],
+      writable: true,
+    });
+
+    fireEvent.change(fileInput);
+
+    await wait(() => {
+      expect(dispatchProgress).toHaveBeenCalledTimes(4);
+    });
+
     done();
   });
 });

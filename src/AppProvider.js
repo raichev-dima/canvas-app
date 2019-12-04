@@ -27,6 +27,7 @@ function appReducer(state, action) {
     case AppActions.RESET:
       return initialAppState;
     default:
+      /* istanbul ignore next line */
       return state;
   }
 }

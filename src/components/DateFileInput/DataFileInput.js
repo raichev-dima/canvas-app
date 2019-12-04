@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useReducer, useState } from 'react';
+import throttle from 'lodash.throttle';
 
 import SrOnly from '../SrOnly/SrOnly';
 import styles from './DataFileInput.module.scss';
@@ -35,6 +36,7 @@ function dataFileInputReducer(state, action) {
     case DataFileInputActions.DRAG_ENTER:
       return { ...state, active: true };
     default:
+      /* istanbul ignore next line */
       return state;
   }
 }
@@ -61,7 +63,20 @@ const useDragEventHandler = () => {
   return [state, handler];
 };
 
-function DataFileInput(props) {
+
+/* istanbul ignore next */
+const dispatchProgressDefault = throttle(
+  (progress, dispatch) =>
+    dispatch({
+      type: AppActions.PROGRESS_CHANGE,
+      payload: progress,
+    }),
+  1000
+);
+
+// the dispatchProgress prop exists only for testing purpose
+// didn't find any other appropriate way to test it yet
+function DataFileInput({ dispatchProgress = dispatchProgressDefault, ...rest }) {
   const ref = useRef(document.createElement('div'));
   const workerRef = useRef(new WebWorker());
 
@@ -83,10 +98,7 @@ function DataFileInput(props) {
           payload,
         });
       } else if (progress) {
-        appDispatch({
-          type: AppActions.PROGRESS_CHANGE,
-          payload: progress,
-        });
+        dispatchProgress(progress, appDispatch);
       } else {
         appDispatch({
           type: AppActions.PROCESS_FILE_ERROR,
@@ -95,6 +107,7 @@ function DataFileInput(props) {
       }
     };
 
+    /* istanbul ignore next */
     const errorHandler = error => {
       error.preventDefault();
       thisWorker.terminate();
@@ -105,27 +118,26 @@ function DataFileInput(props) {
     return () => {
       thisWorker.terminate();
     };
-  }, [appDispatch]);
+  }, [appDispatch, dispatchProgress]);
 
   useEffect(() => {
     const node = ref.current;
 
     const handleDrop = e => {
-      if (appState.loading) {
-        return;
-      }
-
       e.preventDefault();
       e.stopPropagation();
-      appDispatch({ type: AppActions.RESET });
 
-      const [file] = e.dataTransfer.files;
+      if (!appState.loading) {
+        appDispatch({ type: AppActions.RESET });
 
-      if (file) {
-        setFile(file);
+        const [file] = e.dataTransfer.files;
+
+        if (file) {
+          setFile(file);
+        }
+
+        e.target.blur();
       }
-
-      e.target.blur();
     };
 
     dragEvents.forEach(eventType =>
@@ -154,6 +166,9 @@ function DataFileInput(props) {
 
   // Delay a loading indicator by a half a sec
   useEffect(() => {
+    // to test this it's better to extract this as a custom hook
+    // just ignore it yet
+    /* istanbul ignore next */
     const timeout = setTimeout(() => {
       setLoading(appState.loading);
     }, 500);
@@ -183,7 +198,7 @@ function DataFileInput(props) {
     : {};
 
   return (
-    <div ref={ref} className={styles.inputDataField} {...props}>
+    <div ref={ref} className={styles.inputDataField} {...rest}>
       <SrOnly
         is="input"
         type="file"
